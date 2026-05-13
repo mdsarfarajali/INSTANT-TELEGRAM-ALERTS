@@ -56,4 +56,6 @@ Example:
 ```bash
 /nifty 24800 24700 0 24500
 
-https://github.com/user-attachments/assets/50caa9fe-872c-4fb1-859f-c14779f11855
+https://github.com/user-attachments/assets/45e58267-2b0c-4e05-8e24-852e3c38abe1
+
+
