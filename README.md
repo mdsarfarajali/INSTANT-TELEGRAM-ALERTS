@@ -55,3 +55,5 @@ Quickly add multiple levels directly from Telegram.
 Example:
 ```bash
 /nifty 24800 24700 0 24500
+
+https://github.com/user-attachments/assets/50caa9fe-872c-4fb1-859f-c14779f11855
