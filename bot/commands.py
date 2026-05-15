@@ -24,8 +24,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/niftyactive — Show active levels\n"
         "/niftyremove <price> — Deactivate level\n"
         "/niftyreset — Clear all levels\n\n"
-        "🟡 *XAUUSD:* Send a single price. Direction doesn't matter.\n"
-        "/xauusd — Set level (e.g., `/xauusd 2350.50`)\n"
+        "🟡 *XAUUSD:* Send up to 2 prices. Order: `CALL, PUT`\n"
+        "/xauusd — Set levels (e.g., `/xauusd 2350 2360` or `/xauusd 0 2360`)\n"
         "/xauusdactive — Show active levels\n"
         "/xauusdremove <price> — Deactivate level\n"
         "/xauusdreset — Clear all levels\n\n"
@@ -84,19 +84,30 @@ async def xauusd_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     parts = raw_text.split()
     
     if not parts:
-        await update.message.reply_text("Please provide a price.\nExample: `/xauusd 2350.50`", parse_mode="Markdown")
+        await update.message.reply_text("Please provide prices.\nExample: `/xauusd 2350 2360` (CALL then PUT)", parse_mode="Markdown")
         return
-
-    try:
-        price = float(parts[0])
-        if price > 0:
-            # For Gold, we store it as "TOUCH" (neutral) or just default to CALL internally
-            await xauusd_db.add_level(price, "TOUCH")
-            await update.message.reply_text(f"✅ *GOLD Added:* {price}", parse_mode="Markdown")
-        else:
-            await update.message.reply_text("❌ Invalid price.")
-    except ValueError:
-        await update.message.reply_text("❌ Please enter a valid number.")
+    
+    # Gold Order: 0:CALL, 1:PUT
+    gold_types = ["CALL", "PUT"]
+    added = []
+    
+    for i, part in enumerate(parts[:2]): # Max 2 levels
+        try:
+            price = float(part)
+            if price <= 0: continue
+            
+            level_type = gold_types[i]
+            await xauusd_db.add_level(price, level_type)
+            added.append(f"  • {price} ({level_type})")
+        except ValueError:
+            continue
+            
+    if added:
+        total_count = await xauusd_db.get_today_level_count()
+        await xauusd_db.update_daily_history(total_count)
+        await update.message.reply_text(f"✅ *GOLD Added:*\n" + "\n".join(added), parse_mode="Markdown")
+    else:
+        await update.message.reply_text("❌ No valid prices found.")
 
 
 async def _active_levels(update: Update, db_module, instrument_name: str):
@@ -182,7 +193,7 @@ async def handle_plain_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "❌ *Oops! You sent the price in a separate message.*\n\n"
         "You must type the command **AND** the price together in the **SAME** message.\n\n"
         "✅ *Correct Way for Gold:*\n"
-        "`/xauusd 4716`\n\n"
+        "`/xauusd 2350 2360` (CALL first, then PUT)\n\n"
         "✅ *Correct Way for Nifty:*\n"
         "`/nifty 24800 24700 0 24500`\n\n"
         "Please type it exactly like the examples above!",

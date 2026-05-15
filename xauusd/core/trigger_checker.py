@@ -50,17 +50,17 @@ class TriggerChecker:
             
             if ttype == "CALL":
                 if current_price >= tp:
-                    closed_status, pnl = "PROFIT", 50.0
+                    closed_status, pnl = "PROFIT", 5.0
                 elif current_price <= sl:
-                    closed_status, pnl = "LOSS", -50.0
+                    closed_status, pnl = "LOSS", -5.0
             elif ttype == "PUT":
                 if current_price <= tp:
-                    closed_status, pnl = "PROFIT", 50.0
+                    closed_status, pnl = "PROFIT", 5.0
                 elif current_price >= sl:
-                    closed_status, pnl = "LOSS", -50.0
+                    closed_status, pnl = "LOSS", -5.0
             else: # TOUCH fallback (if used)
                 if current_price >= tp or current_price <= sl:
-                    closed_status, pnl = "PROFIT", 50.0 # Just score it
+                    closed_status, pnl = "PROFIT", 5.0 # Just score it
                     
             if closed_status:
                 await portfolio.close_trade(trade_id, closed_status, pnl)
